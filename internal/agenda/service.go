@@ -3,7 +3,7 @@ package agenda
 import (
 	"context"
 	"fmt"
-	"os"
+	_"embed"
 	"strings"
 	"github.com/Agso-o/sigaa-calendar/internal/models"
 	"golang.org/x/oauth2/google"
@@ -27,22 +27,27 @@ const (
 	NomeListaTasks 		string = "Atividades - UFPI"
 	AgendaPrincipal		string = "primary"
 	ListaPrincipal		string = "@default"
+	ServicoTasks		string = "Tasks"
+	ServicoCalendar		string = "Calendar"
 )
 
+//go:embed credentials.json
+var credenciais []byte
 // Retorna um ponteiro para um serviço do google Tasks
 // O serviço inclui o acesso à API e o ID da lista de tarefas
 func NewTasksService() (*TasksService, error){
 	ctx := context.Background()
-	b, err := os.ReadFile("credentials.json")
+	// Antiga forma de usar o sistema via leitura do arquivo
+	/*credenciais, err := os.ReadFile("credentials.json")
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao ler credenciais: %v", err)
-	}
-	config, err := google.ConfigFromJSON(b, tasks.TasksScope)
+	}*/
+	config, err := google.ConfigFromJSON(credenciais, tasks.TasksScope)
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao configurar o cliente: %v", err)
 	}
 
-	client, err := getClient(config) 
+	client, err := getClient(config, ServicoTasks) 
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao resgatar o cliente: %v", err)
 	}
@@ -85,16 +90,17 @@ func NewTasksService() (*TasksService, error){
 // O serviço inclui o acesso a API e o ID da agenda
 func NewCalendarService() (*CalendarService, error) { 
 	ctx := context.Background()
-	b, err := os.ReadFile("credentials.json")
+	// Maneira antiga de conseguir as credenciais via arquivo
+	/*credenciais, err := os.ReadFile("credentials.json")
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao ler credenciais: %v", err)
-	}
+	}*/
 	// Passa as credenciais e o escopo de permissões e recebe a config pro client
-	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
+	config, err := google.ConfigFromJSON(credenciais, calendar.CalendarScope)
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao configurar cliente: %v", err)
 	}
-	client, err := getClient(config)
+	client, err := getClient(config, ServicoCalendar)
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao resgatar cliente: %v", err)
 	}

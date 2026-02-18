@@ -1,18 +1,32 @@
 package agenda
 
 import (
-	"os"
-	"fmt"
 	"context"
-	"golang.org/x/oauth2"
-	"net/http"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+
+	"golang.org/x/oauth2"
 )
 
-// Resgata um token, salva o token e retorna o cliente
-func getClient(config *oauth2.Config) (*http.Client, error) {
+func getTokenPath(tipoServico string) string {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		configDir = "."
+	}
+	appDir := filepath.Join(configDir, "sigaa-calendar")
 
-	tokFile := "token.json"
+	_ = os.MkdirAll(appDir, 0755)
+
+	return filepath.Join(appDir, fmt.Sprintf("%sToken.json", tipoServico))
+
+}
+
+// Resgata um token, salva o token e retorna o cliente
+func getClient(config *oauth2.Config, tipoServico string) (*http.Client, error) {
+	tokFile := getTokenPath(tipoServico)
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok, err = getTokenFromWeb(config)

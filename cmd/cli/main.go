@@ -10,13 +10,17 @@ import (
 	"github.com/joho/godotenv"
 )
 
+
+
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Não foi possível carregar as credenciais: ", err)
+	_ = godotenv.Load()
+	sigaaUser := os.Getenv("SIGAA_USER")
+	sigaaSenha := os.Getenv("SIGAA_SENHA")
+	if sigaaSenha == "" || sigaaUser == "" {
+		log.Fatal("Não foi possível recuperar credenciais sigaa")
 	}
 
-	sigaaSrv, err:= sigaa.NewSigaaService(os.Getenv("SIGAA_USER"), os.Getenv("SIGAA_SENHA"))
+	sigaaSrv, err:= sigaa.NewSigaaService(sigaaUser, sigaaSenha)
 
 	if err != nil{
 		log.Fatal("Não foi possíel inicira serviço sigaa: ", err)
@@ -62,8 +66,9 @@ func main() {
 		}
 		log.Println("----------Tarefas salvas----------")
 	}
-	
-	salvaHorario(turmas)
+
+	// Funcionalidade precisa de ajustes
+	//salvaHorario(turmas)
 }
 
 // Pega os dados de turmas pra salvar os horarios das aulas com os dados das turmas

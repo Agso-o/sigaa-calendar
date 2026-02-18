@@ -9,7 +9,7 @@ import (
 func (s *TasksService) SaveTask(tarefa models.Tarefa, tarefasExistentes map[string]string) (error) {
 	task := &tasks.Task{
 		Title: fmt.Sprintf("[%s]: %s", tarefa.Disciplina, tarefa.Titulo),
-		Notes: fmt.Sprintf("%s\n%s", tarefa.DataVencimento.Format("02-01-2006 às 15:04"), tarefa.Descricao),
+		Notes: fmt.Sprintf("%s\n%s", tarefa.DataVencimento.Format("02/01/2006 às 15:04"), tarefa.Descricao),
 		Due: tarefa.DataVencimento.Format("2006-01-02")+"T00:00:00Z",
 		
 	}
