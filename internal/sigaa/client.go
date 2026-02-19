@@ -159,7 +159,6 @@ func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, e
 
 	c := s.Collector
 
-
 	// Limpa Seletores
 	c.OnHTMLDetach("div#barraEsquerda a")
 	c.OnHTMLDetach("td.first[style*='bold']")
@@ -203,6 +202,13 @@ func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, e
 
 	c.OnHTML("td.first[style*='bold']", func(e *colly.HTMLElement) {
 		titulo := strings.TrimSpace(e.Text)
+		// No sigaa, quando tem o "Visualizar tarefa enviada", ela já foi enviada
+		tarefaEnviada := e.DOM.Parent().Find("a[title*='Visualizar']")
+		// Se a tarefa já foi enviada, ela é ignorada aqui
+		if tarefaEnviada.Length() > 0 {
+			return
+		}
+
 		descricao := e.DOM.Parent().Next().Find("td.first p").Text()
 		descricao = strings.TrimSpace(descricao)
 		dataRaw := e.DOM.Parent().Find("td[style*='center']").Text()
