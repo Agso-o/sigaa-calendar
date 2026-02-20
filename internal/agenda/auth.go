@@ -52,6 +52,7 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error){
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		canalCodigo <- code
+		http.Redirect(w, r, "https://calendar.google.com/calendar/", http.StatusSeeOther)
 	})
 
 	

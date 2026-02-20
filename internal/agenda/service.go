@@ -101,6 +101,7 @@ func NewCalendarService() (*CalendarService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao configurar cliente: %v", err)
 	}
+	config.RedirectURL = "http://localhost:8080"
 	client, err := getClient(config, ServicoCalendar)
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao resgatar cliente: %v", err)

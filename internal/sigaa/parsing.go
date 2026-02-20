@@ -3,12 +3,20 @@ package sigaa
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/Agso-o/sigaa-calendar/internal/models"
 )
 
+const (
+	// Formato MMDDYYYY
+	diaInicioSemestre1 = "0310" // 10 de Março
+	diaFimSemestre1 = "0711" // 11 de Julho
+	diaInicioSemestre2 = "0811" // 11 de Agosto
+	diaFimSemestre2 = "1214" // 14 de dezembro
+)
 var mapaHorariosInicio = map[string]int{
 	// Manhã
 	"M1": 6,  // 06:00
@@ -31,7 +39,17 @@ var mapaHorariosInicio = map[string]int{
 	"N4": 21, // 21:00
 }
 
-var mapaDias = map[rune]string{
+var timeMapaDias = map[rune]time.Weekday {
+	'1': time.Sunday, // Domingo
+	'2': time.Monday, // Segunda
+	'3': time.Tuesday, // Terça
+	'4': time.Wednesday, // Quarta
+	'5': time.Thursday, // Quinta
+	'6': time.Friday, // Sexta
+	'7': time.Saturday, // Sábado
+}
+
+var mapaDias = map[rune]string {
 	'1': "SU", // Domingo
 	'2': "MO", // Segunda
 	'3': "TU", // Terça
@@ -94,37 +112,49 @@ func ParseHorarioAgenda(horarioRaw, anoSemestre string) (recorrencia string, sta
 
 	loc, _ := time.LoadLocation(models.TimeZone)
 
-	// Data de inicio do primeiro semestre: 10 de março
-	dataAux := "10/03/"+ano
+	// Data de inicio do primeiro semestre, ex: 10 de março
+	dataAux := diaInicioSemestre1+ano
 	if semestre == "2" {
 		// Data de inicio do segundo semestre
-		dataAux = "10/08/"+ano	
+		dataAux = diaInicioSemestre2+ano	
 	}
-	inicio, err := time.Parse("02/01/2006", dataAux)
+	inicio, err := time.Parse("01022006", dataAux)
 
-	dataFim := ano + "0715"
+	dataFim := ano + diaFimSemestre1
 	if semestre == "2" {
 		//Fim do segundo semestre, 15 de dezembro
-		dataFim = ano + "1215" 
+		dataFim = ano + diaFimSemestre2
 	}
 
 	if err != nil {
 		return "", time.Time{}, time.Time{}, fmt.Errorf("Não foi possível converter formato de dada: %v", err)
 	}
 
-	startTime = time.Date(inicio.Year(), inicio.Month(), inicio.Day(), horarioInicio, 0, 0, 0, loc)
-	endTime = startTime.Add(time.Duration(duracaoHoras) * time.Hour)
-
+	var diasTime []time.Weekday
 	var diasRrule []string
 	for _, dia := range dias {
 		if val, ok := mapaDias[dia]; ok {
 			diasRrule = append(diasRrule, val)
 		}
+		if val, ok := timeMapaDias[dia]; ok {
+			diasTime = append(diasTime, val)
+		}
 	}
-
-
+	dataPrimeiraAula := primeiroDiaDeAula(inicio, diasTime)	
+	startTime = time.Date(dataPrimeiraAula.Year(), dataPrimeiraAula.Month(), dataPrimeiraAula.Day(), horarioInicio, 0, 0, 0, loc)
+	endTime = startTime.Add(time.Duration(duracaoHoras) * time.Hour)
+	
 	recorrencia = fmt.Sprintf("RRULE:FREQ=WEEKLY;BYDAY=%s;UNTIL=%sT235959Z", strings.Join(diasRrule, ","), dataFim)
 
 	return recorrencia, startTime, endTime, nil
-
 }
+func primeiroDiaDeAula(inicio time.Time, diasTime []time.Weekday) time.Time{
+	dataInicio := inicio
+	for range 7 {
+		if slices.Contains(diasTime, dataInicio.Weekday()) {
+			return dataInicio
+		}
+		dataInicio = dataInicio.AddDate(0, 0, 1)
+	}
+	return inicio
+}	

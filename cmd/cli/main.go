@@ -39,6 +39,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Não foi possível iniciar o serviço ", err)
 	}
+	// Funcionalidade precisa de ajustes
+	salvaHorario(turmas)
 	
 	// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
 	tarefasExistentes, err := agendaSrv.GetTasks()
@@ -66,8 +68,7 @@ func main() {
 		}
 		log.Println("----------Tarefas salvas----------")
 	}
-	// Funcionalidade precisa de ajustes
-	//salvaHorario(turmas)
+	
 }
 
 // Pega os dados de turmas pra salvar os horarios das aulas com os dados das turmas
@@ -96,7 +97,7 @@ func salvaHorario(turmas []models.Turma) {
 				novaAula.Disciplina, err)
 				return
 		} else {
-			fmt.Println("----------Evento salvo com sucesso----------")
+			fmt.Println("----------Evento de aula salvo com sucesso----------")
 		}
 	}
 }

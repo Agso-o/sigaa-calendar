@@ -13,6 +13,7 @@ func (s *TasksService) SaveTask(tarefa models.Tarefa, tarefasExistentes map[stri
 		Due: tarefa.DataVencimento.Format("2006-01-02")+"T00:00:00Z",
 		
 	}
+	// Aqui tem que implementar a verificação se mudou a data de entrega
 	if _, existe := tarefasExistentes[task.Title]; existe {
 		return nil
 	}
@@ -32,7 +33,8 @@ func (s *TasksService) GetTasks() (map[string]string, error){
     pageToken := "" // Começa vazio
 
     for {
-        tarefas, err := s.srv.Tasks.List(s.TaskID).ShowCompleted(true).ShowHidden(true).PageToken(pageToken).Do()
+		// Como o sistema já verifica se a tarefa foi completada no sigaa, nao precisa pegar as completadas aqui
+        tarefas, err := s.srv.Tasks.List(s.TaskID).ShowCompleted(false).ShowHidden(true).PageToken(pageToken).Do()
         if err != nil {
             return nil, fmt.Errorf("erro ao listar tasks: %v", err)
         }
