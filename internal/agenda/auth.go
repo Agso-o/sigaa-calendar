@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"time"
 
 	"golang.org/x/oauth2"
 )
@@ -40,21 +43,55 @@ func getClient(config *oauth2.Config, tipoServico string) (*http.Client, error) 
 
 // Faz a requisição do token na web e retorna o token resgatado
 func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error){
+	canalCodigo := make(chan string)
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
-
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
-		return nil, fmt.Errorf("Erro ao requerir token da web: %v", err)
+	server := &http.Server{
+		Addr: ":8080",
 	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		code := r.URL.Query().Get("code")
+		canalCodigo <- code
+	})
+
+	
+	go func() {
+		server.ListenAndServe()	
+	}()
+
+	err := openBrowser(authURL)
+	if err != nil {
+		return nil, err
+	}
+	authCode := <- canalCodigo
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+		defer cancel()
+		server.Shutdown(ctx)
+	}()
+
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao requerir token da web: %v", err)
 	}
 	return tok, nil
+}
+// Função auxiliar para abrir o navegador
+func openBrowser(url string) error {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("Plataforma não suportada")
+	}
+	return err
 }
 
 // Resgata um token de um arquivo local

@@ -51,12 +51,12 @@ func main() {
 		rec, st, end, _ := sigaa.ParseHorarioAgenda(turma.Horario, turma.AnoSemestre)
 		fmt.Printf("\tLocal: %s\n\tCréditos: %s\n\tHorário Sigaa: %s\n\tHorario Parsed: \n\t\t%s\n\t\t%v\n\t\t%v\n", 
 			turma.Local, turma.Creditos, turma.Horario, rec, st, end)
-
 		// Pega as tarefas da conta do sigaa
 		tarefas, err := sigaaSrv.GetTarefasByTurma(turma)
 		if err != nil {
 			log.Printf("Não foi possível pegar atividades de %s, %v\n", turma.Disciplina, err)
-		}	
+			return
+		}
 		log.Println("----------Tarefas Coletadas----------")
 		for _, tarefa := range tarefas {
 			err := agendaSrv.SaveTask(tarefa, tarefasExistentes)
@@ -66,7 +66,6 @@ func main() {
 		}
 		log.Println("----------Tarefas salvas----------")
 	}
-
 	// Funcionalidade precisa de ajustes
 	//salvaHorario(turmas)
 }

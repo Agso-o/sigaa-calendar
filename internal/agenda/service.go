@@ -47,6 +47,7 @@ func NewTasksService() (*TasksService, error){
 		return nil, fmt.Errorf("Erro ao configurar o cliente: %v", err)
 	}
 
+	config.RedirectURL = "http://localhost:8080"
 	client, err := getClient(config, ServicoTasks) 
 	if err != nil {
 		return nil, fmt.Errorf("Erro ao resgatar o cliente: %v", err)

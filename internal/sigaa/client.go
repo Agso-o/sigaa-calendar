@@ -82,7 +82,7 @@ func (s *SigaaService) GetTurmasAtuais() ([]models.Turma, error) {
 func (s *SigaaService) GetTurmasAnteriores() ([]models.Turma, error) {
 	var turmas []models.Turma
 	
-	c := s.Collector
+	c := s.Collector.Clone()
 	//Limpa o seletor
 	c.OnHTMLDetach("table.listagem tr") 
     c.OnHTMLDetach("#turmas-portal span.mais a")
