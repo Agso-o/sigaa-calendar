@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"flag"
 	"github.com/Agso-o/sigaa-calendar/internal/agenda"
 	"github.com/Agso-o/sigaa-calendar/internal/models"
 	"github.com/Agso-o/sigaa-calendar/internal/sigaa"
@@ -11,6 +12,24 @@ import (
 )
 
 func main() {
+	// Flags de Terminal: Interface CLI
+	flag.Usage = func() {
+		fmt.Printf("----------Sigaa Calendar----------\n\n")
+		fmt.Printf("Uso:\n")
+		fmt.Printf(" sigaa-calendar [flags]\n\n")
+		fmt.Println("Flags disponíveis:")
+		flag.PrintDefaults()
+		fmt.Println("Padrão: Sincroniza somente tarefas caso nenhuma flag seja fornecida")
+	}
+	flagAulas := flag.Bool("aulas", false, "Sincroniza os horários das aulas com o Google Agenda")
+	flagTarefas := flag.Bool("tarefas", false, "Sincroniza prazos de entrega de trabalhos com o Google Tasks")
+	
+	flag.Parse()
+
+	if !*flagTarefas && !*flagAulas {
+		*flagTarefas = true
+	}
+	
 	// Recebe Credenciais das variaveis de ambiente
 	_ = godotenv.Load()
 	sigaaUser := os.Getenv("SIGAA_USER")
@@ -28,21 +47,25 @@ func main() {
 	if err != nil {
 		log.Fatal("Erro ao logar no sigaa")
 	}
-	turmas, err := sigaaSrv.GetTurmasAnteriores()
+	turmas, err := sigaaSrv.GetTurmas()
 	if err != nil {
-		log.Fatal("Não foi possível recuperar turmas anteriores: ", err)
+		log.Fatal("Não foi possível recuperar turmas: ", err)
 	}
 	
 	// Cria o serviço do google
 	agendaSrv, err := agenda.NewGoogleService()
 	if err != nil {
-		log.Fatal("Não foi possível iniciar o serviço ", err)
+		log.Fatal("Não foi possível iniciar o serviço do google: ", err)
 	}
 	
-	// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
-	tarefasExistentes, err := agendaSrv.TasksService.GetTasks()
-	if err != nil {
-		log.Fatal("Não foi possível listar tarefas: ", err)
+	var tarefasExistentes map[string]string
+
+	if *flagTarefas {
+		// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
+		tarefasExistentes, err = agendaSrv.TasksService.GetTasks()
+		if err != nil {
+			log.Fatal("Não foi possível listar tarefas: ", err)
+		}
 	}
 
 	for _, turma := range turmas {
@@ -52,40 +75,43 @@ func main() {
 			turma.Local, turma.Creditos, turma.Horario, rec, st, end)
 		
 		// Salva o horário no calendar
-		// Cria o objeto de aula
-		novaAula := &models.Aula{
-			Disciplina: turma.Disciplina,
-			Local: turma.Local,
-			StartTime: st,
-			EndTime: end,
-			Recorrencia: rec,
-		}
-		//Tenta salvar o evento e trata o erro
-		err := agendaSrv.CalendarService.SaveEventAula(*novaAula)
-		if err != nil {
-			fmt.Printf("Não foi possível salvar evento para: %s\n\tErro: %v\n",
-				novaAula.Disciplina, err)
-				return
-		} else {
-			fmt.Println("----------Evento de aula salvo com sucesso----------")
-		}
-		
-		// Salva as tarefas no Tasks
-		// Pega as tarefas da conta do sigaa
-		tarefas, err := sigaaSrv.GetTarefasByTurma(turma)
-		if err != nil {
-			log.Printf("Não foi possível pegar atividades de %s, %v\n", turma.Disciplina, err)
-			return
-		}
-		log.Println("----------Tarefas Coletadas----------")
-		// Tenta salvar as tarefas de cada turma
-		for _, tarefa := range tarefas {
-			err := agendaSrv.TasksService.SaveTask(tarefa, tarefasExistentes)
-			if err != nil {
-				log.Println("Não foi possível salvar essa tarefa: ", err)
+		if *flagAulas {
+			// Cria o objeto de aula
+			novaAula := &models.Aula{
+				Disciplina: turma.Disciplina,
+				Local: turma.Local,
+				StartTime: st,
+				EndTime: end,
+				Recorrencia: rec,
 			}
+			//Tenta salvar o evento e trata o erro
+			err := agendaSrv.CalendarService.SaveEventAula(*novaAula)
+			if err != nil {
+				fmt.Printf("Não foi possível salvar evento para: %s\n\tErro: %v\n",
+					novaAula.Disciplina, err)
+			} else {
+				fmt.Println("----------Evento de aula salvo com sucesso----------")
+			}
+		}	
+
+		// Salva as tarefas no Tasks
+		if *flagTarefas {
+			// Pega as tarefas da conta do sigaa
+			tarefas, err := sigaaSrv.GetTarefasByTurma(turma)
+			if err != nil {
+				log.Printf("Não foi possível pegar atividades de %s, %v\n", turma.Disciplina, err)
+				continue
+			}
+			log.Println("----------Tarefas Coletadas----------")
+			// Tenta salvar as tarefas de cada turma
+			for _, tarefa := range tarefas {
+				err := agendaSrv.TasksService.SaveTask(tarefa, tarefasExistentes)
+				if err != nil {
+					log.Println("Não foi possível salvar essa tarefa: ", err)
+				}
+			}
+			log.Println("----------Tarefas salvas----------")
 		}
-		log.Println("----------Tarefas salvas----------")
 	}
 	
 }
