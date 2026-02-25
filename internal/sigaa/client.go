@@ -74,8 +74,8 @@ func (s *SigaaService) LoginSigaa() error{
 }
 
 // Para implementar: Dados de turmas atuais só aparecem após as matriculas serem processadas 
-func (s *SigaaService) GetTurmasAtuais() ([]models.Turma, error) {
-	return nil, nil	
+func (s *SigaaService) GetTurmas() ([]models.Turma, error) {
+	return s.GetTurmasAnteriores()	
 }
 
 // Após o fim de um semestre, só essa informação vai ser disponível

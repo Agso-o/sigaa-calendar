@@ -44,7 +44,7 @@ func getClient(config *oauth2.Config, tipoServico string) (*http.Client, error) 
 // Faz a requisição do token na web e retorna o token resgatado
 func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error){
 	canalCodigo := make(chan string)
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 	server := &http.Server{
 		Addr: ":8080",
 	}
