@@ -3,6 +3,7 @@ package agenda
 import (
 	"context"
 	"fmt"
+	"net/http"
 	_"embed"
 	"strings"
 	"github.com/Agso-o/sigaa-calendar/internal/models"
@@ -39,19 +40,20 @@ const (
 //go:embed credentials.json
 var credenciais []byte
 
-func NewGoogleService() (*GoogleService, error){
+func NewGoogleService(client *http.Client) (*GoogleService, error){
 	// Confguração principal pra pegar permissão
 	ctx := context.Background()
-	config, err := google.ConfigFromJSON(credenciais, tasks.TasksScope, calendar.CalendarScope)
-	if err != nil {
-		return nil, fmt.Errorf("Erro ao configurar o cliente: %v", err)
-	}
-	config.RedirectURL = "http://localhost:8080"
-	client, err := getClient(config, fmt.Sprintf("%s+%s",ServicoTasks, ServicoCalendar)) 
-	if err != nil {
-		return nil, fmt.Errorf("Erro ao resgatar o cliente: %v", err)
-	}
-	
+	if client == nil {
+		config, err := google.ConfigFromJSON(credenciais, tasks.TasksScope, calendar.CalendarScope)
+		if err != nil {
+			return nil, fmt.Errorf("Erro ao configurar o cliente: %v", err)
+		}
+		config.RedirectURL = "http://localhost:8080"
+		client, err = getClient(config, fmt.Sprintf("%s+%s",ServicoTasks, ServicoCalendar)) 
+		if err != nil {
+			return nil, fmt.Errorf("Erro ao resgatar o cliente: %v", err)
+		}
+	}	
 	//Criação do serviço tasks e criação da lista se não existir
 	srvTasks, err := tasks.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
