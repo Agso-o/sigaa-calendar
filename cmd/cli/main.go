@@ -53,7 +53,7 @@ func main() {
 	}
 	
 	// Cria o serviço do google
-	agendaSrv, err := agenda.NewGoogleService(nil)
+	agendaSrv, err := agenda.NewGoogleService()
 	if err != nil {
 		log.Fatal("Não foi possível iniciar o serviço do google: ", err)
 	}
