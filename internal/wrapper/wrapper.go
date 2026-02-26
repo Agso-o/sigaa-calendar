@@ -1,70 +1,45 @@
-package main
+package wrapper
 
 import (
 	"fmt"
 	"log"
-	"os"
-	"flag"
+	"net/http"
 	"github.com/Agso-o/sigaa-calendar/internal/agenda"
 	"github.com/Agso-o/sigaa-calendar/internal/models"
 	"github.com/Agso-o/sigaa-calendar/internal/sigaa"
-	"github.com/joho/godotenv"
 )
 
-func main() {
-	// Flags de Terminal: Interface CLI
-	flag.Usage = func() {
-		fmt.Printf("----------Sigaa Calendar----------\n\n")
-		fmt.Printf("Uso:\n")
-		fmt.Printf(" sigaa-calendar [flags]\n\n")
-		fmt.Println("Flags disponíveis:")
-		flag.PrintDefaults()
-		fmt.Println("Padrão: Sincroniza somente tarefas caso nenhuma flag seja fornecida")
-	}
-	flagAulas := flag.Bool("aulas", false, "Sincroniza os horários das aulas com o Google Agenda")
-	flagTarefas := flag.Bool("tarefas", false, "Sincroniza prazos de entrega de trabalhos com o Google Tasks")
-	
-	flag.Parse()
-
-	if !*flagTarefas && !*flagAulas {
-		*flagTarefas = true
-	}
-	
-	// Recebe Credenciais das variaveis de ambiente
-	_ = godotenv.Load()
-	sigaaUser := os.Getenv("SIGAA_USER")
-	sigaaSenha := os.Getenv("SIGAA_SENHA")
-	if sigaaSenha == "" || sigaaUser == "" {
-		log.Fatal("Não foi possível recuperar credenciais sigaa")
-	}
-
+func SigaaSync (flagAulas, flagTarefas bool, sigaaUser, sigaaPass string, googleClient *http.Client) error {
 	// Loga no sigaa e recupera as turmas
-	sigaaSrv, err:= sigaa.NewSigaaService(sigaaUser, sigaaSenha)
+	sigaaSrv, err:= sigaa.NewSigaaService(sigaaUser, sigaaPass)
 	if err != nil{
-		log.Fatal("Não foi possíel inicira serviço sigaa: ", err)
+		return fmt.Errorf("Não foi possíel iniciar serviço sigaa: %v", err)
 	}
 	err = sigaaSrv.LoginSigaa()
 	if err != nil {
-		log.Fatal("Erro ao logar no sigaa")
+		return fmt.Errorf("Erro ao logar no sigaa")
 	}
+
 	turmas, err := sigaaSrv.GetTurmas()
+
 	if err != nil {
-		log.Fatal("Não foi possível recuperar turmas: ", err)
+		return fmt.Errorf("Não foi possível recuperar turmas: %v", err)
 	}
 	
 	// Cria o serviço do google
-	agendaSrv, err := agenda.NewGoogleService(nil)
+	agendaSrv, err := agenda.NewGoogleService(googleClient)
+
 	if err != nil {
-		log.Fatal("Não foi possível iniciar o serviço do google: ", err)
+		return fmt.Errorf("Não foi possível iniciar o serviço do google: %v", err)
 	}
 	
 	var tarefasExistentes map[string]string
 
-	if *flagTarefas {
+	if flagTarefas {
 		// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
 		tarefasExistentes, err = agendaSrv.TasksService.GetTasks()
 		if err != nil {
-			log.Fatal("Não foi possível listar tarefas: ", err)
+			return fmt.Errorf("Não foi possível listar tarefas: %v", err)
 		}
 	}
 
@@ -75,7 +50,7 @@ func main() {
 			turma.Local, turma.Creditos, turma.Horario, rec, st, end)
 		
 		// Salva o horário no calendar
-		if *flagAulas {
+		if flagAulas {
 			// Cria o objeto de aula
 			novaAula := &models.Aula{
 				Disciplina: turma.Disciplina,
@@ -95,7 +70,7 @@ func main() {
 		}	
 
 		// Salva as tarefas no Tasks
-		if *flagTarefas {
+		if flagTarefas {
 			// Pega as tarefas da conta do sigaa
 			tarefas, err := sigaaSrv.GetTarefasByTurma(turma)
 			if err != nil {
@@ -113,5 +88,6 @@ func main() {
 			log.Println("----------Tarefas salvas----------")
 		}
 	}
-	
+
+	return nil
 }
