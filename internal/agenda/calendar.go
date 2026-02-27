@@ -12,7 +12,7 @@ import (
 
 // Salva um Evento usando o tipo aula, salvando os horarios de aulas
 func (s *CalendarService) SaveEventAula(aula models.Aula) error {
-	hash := md5.Sum([]byte(aula.Disciplina+aula.EndTime.Format(time.RFC3339)))
+	hash := md5.Sum([]byte(aula.Disciplina+aula.Recorrencia))
 	id  := hex.EncodeToString(hash[:]) 
 	event := &calendar.Event{
 		Id: id,
