@@ -29,7 +29,7 @@ func init() {
 	googleOAuthConfig = &oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		RedirectURL:  "http://localhost:8080/callback", // A rota de retorno
+		RedirectURL:  "https://sigaa-calendar.onrender.com/callback", // A rota de retorno
 		Scopes: []string{
 			"https://www.googleapis.com/auth/tasks",
 			"https://www.googleapis.com/auth/calendar",
