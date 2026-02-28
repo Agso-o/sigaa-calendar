@@ -48,6 +48,8 @@ func main() {
 
 	r.LoadHTMLGlob("templates/*")
 
+	r.Static("/static", "./static")
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login_google.html", nil)
 	})
