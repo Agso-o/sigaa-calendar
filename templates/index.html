@@ -4,22 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigaa-Calendar</title>
+    <link rel='stylesheet' href='styles.css'/>
 </head>
 <body>
-    <h2>Sincronize seu SIGAA</h2>
-    
-    <form action="/sincronizar" method="POST">
-        <label>Usuário do SIGAA:</label><br>
-        <input type="text" name="usuario" required><br><br>
-        
-        <label>Senha:</label><br>
-        <input type="password" name="senha" required><br><br>
-        
-        <label>O que sincronizar?</label><br>
-        <input type="checkbox" name="tarefas" value="true" checked> Tarefas (Google Tasks)<br>
-        <input type="checkbox" name="aulas" value="true"> Aulas (Google Agenda)<br><br>
-        
-        <button type="submit">Sincronizar Agora</button>
-    </form>
+
+    <div class="login">    
+        <h2>Entre no SIGAA para sincronizar</h2>
+
+        <p class="aviso">Nenhuma informação de login será salva, a senha será usada apenas para entrar no sistema e depois será descartada.<br/>
+        Caso queira atualizar a lista de tarefas outra vez, você deverá acessar a página inicial e fazer o login no Google novamente</p>
+
+        <form action="/sincronizar" method="POST">
+            <label>Usuário do SIGAA:</label><br>
+            <input type="text" name="usuario" required><br><br>
+
+            <label>Senha:</label><br>
+            <input type="password" name="senha" required><br><br>
+
+            <label>O que sincronizar?</label><br>
+            <div class="checkbox-group">
+                <input type="checkbox" name="tarefas" value="true" checked> Tarefas (Google Tasks)<br>
+                <input type="checkbox" name="aulas" value="true"> Aulas (Google Agenda)<br><br>
+            </div>
+            <button type="submit">Sincronizar Agora</button>
+        </form>
+    </div>
 </body>
 </html>

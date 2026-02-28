@@ -1,0 +1,101 @@
+body {
+    color: #414141; 
+    background-color: #EEEEEE;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    align-items: center;
+    min-height: 100vh;
+    padding 20px
+}
+
+h2 {
+    font-family: "helvetica", Arial, sans-serif;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+
+p {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    background-color: #4285f4;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background-color: #357ae8; 
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%; 
+    padding: 10px;
+    margin-bottom: 15px; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; 
+}
+
+.login {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.checkbox-group {
+    margin: 15px 0;
+    text-align: left;
+    width: 100%;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center; 
+    cursor: pointer;
+    margin-bottom: 8px; 
+    font-weight: normal;
+}
+
+.checkbox-group input {
+    margin-right: 10px; 
+    transform: scale(1.2);
+}
+
+.aviso {
+    font-size: 0.85rem;     
+    color: #666;             
+    background: #f9f9f9;    
+    padding: 10px;           
+    border-left: 4px solid #4285f4; 
+    border-radius: 4px;      
+    margin-bottom: 20px; 
+    line-height: 1.4;
+}
