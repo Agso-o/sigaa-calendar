@@ -144,7 +144,9 @@ func main() {
 			urlDestino = fmt.Sprintf("https://calendar.google.com/calendar/r?authuser=%s", emailDoUsuario)
 		}
 
-		ctx.Redirect(http.StatusSeeOther, urlDestino)
+		ctx.HTML(http.StatusOK, "resultado.html", gin.H{
+			"LinkCalendario": urlDestino,
+		} )
 	})
 
 	r.Run()
