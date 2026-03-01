@@ -62,10 +62,10 @@ func SigaaSync (flagAulas, flagTarefas bool, sigaaUser, sigaaPass string, google
 			//Tenta salvar o evento e trata o erro
 			err := agendaSrv.CalendarService.SaveEventAula(*novaAula)
 			if err != nil {
-				fmt.Printf("Não foi possível salvar evento para: %s\n\tErro: %v\n",
+				log.Printf("Não foi possível salvar evento para: %s\n\tErro: %v\n",
 					novaAula.Disciplina, err)
 			} else {
-				fmt.Println("----------Evento de aula salvo com sucesso----------")
+				log.Println("----------Evento de aula salvo com sucesso----------")
 			}
 		}	
 
