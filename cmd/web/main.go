@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
 	"github.com/Agso-o/sigaa-calendar/internal/wrapper"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -51,7 +50,7 @@ func main() {
 	r.Static("/static", "./static")
 
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "login_google.html", nil)
+		ctx.HTML(http.StatusOK, "index.html", nil)
 	})
 
 	r.GET("/login/google", func(ctx *gin.Context) {
@@ -63,32 +62,30 @@ func main() {
 		code := ctx.Query("code")
 		c := context.Background()
 		
-		// Troca o código pelo Token real
+		// Troca o código pelo Token 
 		token, err := googleOAuthConfig.Exchange(c, code)
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, "Erro no Google")
 			return
 		}
 
-		// Transforma o Token em string (JSON) para guardar no Cookie
+		// Transforma o Token em JSON para guardar no Cookie
 		tokenJSON, _ := json.Marshal(token)
 		
-		// Salva o token na Sessão do usuário
+		// Salva o token na sessão do usuário
 		session := sessions.Default(ctx)
 		session.Set("google_token", string(tokenJSON))
 		session.Save()
-
-		// REDIRECIONA PARA A TELA DO SIGAA!
 		ctx.Redirect(http.StatusFound, "/sigaa")
 	})
 
-	r.GET("/sigaa", func(c *gin.Context) {
-		session := sessions.Default(c)
+	r.GET("/sigaa", func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
 		if session.Get("google_token") == nil {
-			c.Redirect(http.StatusFound, "/")
+			ctx.Redirect(http.StatusFound, "/")
 			return
 		}
-		c.HTML(http.StatusOK, "index.html", nil)
+		ctx.HTML(http.StatusOK, "sigaa_login.html", nil)
 	})
 
 	
@@ -99,7 +96,7 @@ func main() {
 		flagTarefas := ctx.PostForm("tarefas") == "true"
 		flagAulas := ctx.PostForm("aulas") == "true"	
 
-		// 2. Resgata o Token do Google que estava guardado no Cookie
+		// Resgata o Token do Google que estava guardado no cookie
 		session := sessions.Default(ctx)
 		tokenString := session.Get("google_token")
 		if tokenString == nil {
@@ -116,11 +113,11 @@ func main() {
 		// Sincroniza o calendário com o sigaa no plano de fundo pro usuário não ter que esperar
 		// Essa função pode demorar até 2min 
 		go func(user, pass string, client *http.Client) {
-			errSync := wrapper.SigaaSync(flagAulas, flagTarefas, user, pass, client)
-			if errSync != nil {
-				fmt.Printf("Falha no background de %s: %v\n", user, errSync)
+			err := wrapper.SigaaSync(flagAulas, flagTarefas, user, pass, client)
+			if err != nil {
+				fmt.Printf("Falha no background de %s: %v\n", user, err)
 			} else {
-				fmt.Printf("Sincronização de %s concluída com sucesso!\n", user)
+				fmt.Printf("Sincronização de %s concluída com sucesso\n", user)
 			}
 		}(usuario, senha, googleClient)
 		
