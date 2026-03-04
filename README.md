@@ -28,7 +28,7 @@ Sem instalação e de uso rápido, ideal para usuários mobile
 6. Clique em ``Sincronizar agora`` e pronto, seus dados seráo sincronizados no plano de fundo.
 
 ### **Modo CLI**
-Essa interface tende a ser um pouco menos acessível, porém bem mais poderosa, permitindo automações localmente. Ela exige um pouco mais de configuração, então antes de prosseguir siga as instruções disponíveis em: [instalação](#instalacao)
+Essa interface tende a ser um pouco menos acessível, porém bem mais poderosa, permitindo automações localmente. Ela exige um pouco mais de configuração, então antes de prosseguir siga as instruções disponíveis em: [instalação](#instalação)
 
 Após instalar a ferramenta, você poderá ver o guia a seguir digitando o seguinte comando:
 ```bash
