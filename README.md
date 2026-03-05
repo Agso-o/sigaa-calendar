@@ -5,6 +5,8 @@ Não perca a hora e automatize seu semestre: com o **Sigaa Calendar**, todos os 
 Este projeto foi desenvolvido com o objetivo de organizar meus próprios horários e auxiliar estudantes em sua jornada acadêmica, tentando melhorar a experiência de quem usa o sistema da Universidade Federal do Piauí (UFPI). Para isso, o **Sigaa Calendar** conecta sistema antigo do SIGAA ao sistema moderno do Google Calendar, sincronizando horários de aula, datas de entrega de trabalhos/atividades e datas de renovação da biblioteca.
 
 #
+## Status do Projeto
+Atualmente o projeto está em fase de testes, com foco em correção de bugs, melhorias, e na implementação da funcionalidade de sincronizar os prazos de renovação de livros da biblioteca
 ## Funcionalidades
 - **Sincronização de Horários de aulas**: Salva todos os seus horários de aulas direto do SIGAA para uma nova agenda no Google Calendar como eventos recorrentes que começam do início do período e seguem até o final automaticamente
 
@@ -13,7 +15,7 @@ Este projeto foi desenvolvido com o objetivo de organizar meus próprios horári
 - **Sincronização de datas de renovação da Biblioteca**: ---Em desenvolvimento---
 
 ## Guia de uso
-O SIGAA-Calendar oferece duas formas de interagir com a ferramenta: uma interface gráfica via web, para maior acessibilidade e uma interface de linha de comando através do binário disponível em [releases](https://github.com/Agso-o/sigaa-calendar/releases)
+O SIGAA-Calendar oferece duas formas de interagir com a ferramenta: uma interface gráfica via web, para maior acessibilidade e uma interface de linha de comando através do programa compilado.
 > Por não ser um app verificado pela Google, esta ferramenta possui um limite de usuários. Portanto, antes de conseguir utilizar uma das interfaces abaixo, é necessário ter seu e-mail adicionado na lista de usuários testadores.
 > 
 > Você pode obter esse acesso entrando em contato comigo, caso haja disponibilidade de vagas, ou utilizando sua própria conta do Google Cloud e compilando o projeto de forma independente.
@@ -64,11 +66,13 @@ sigaa-calendar --tarefas --aulas
 > Fique tranquilo, seus dados não serão guardados em nenhuma etapa dessa aplicação (seja web ou CLI), o usuário e senha do SIGAA são utilizados somente para o acesso ao sistema, e são descartados imediatamente. Durante o login esses dados ficam apenas na memória RAM e não são armazenados de nenhuma forma.
 
 ## Instalação
+Este projeto encontra-se atualmente em desenvolvimento. As instruções de instalação serão disponibilizadas em breve.
 
 ## Como contribuir
 - O desenvolvimento desse projeto faz parte dos meus estudos pessoais, portanto, atualmente este repositório não aceita contribuições de códigos de terceiros.
 - Caso queira contribuir, você pode abrir uma [issue](https://github.com/Agso-o/sigaa-calendar/issues) com algo que você gostaria que seja corrigido ou adicionado ao projeto.
 - Este projeto foca em organização de prazos e horários, qualquer idéia adicionada as issues deve ser limitada a esse escoṕo
+- Outros tipos de contribuições podem ser consultadas pelo e-mail: sigaacalendar@gmail.com
 
 ## Avisos legais
 - Este software é uma **iniciativa independente** e não possui vínculo oficial com o desenvolvimento do SIGAA.
