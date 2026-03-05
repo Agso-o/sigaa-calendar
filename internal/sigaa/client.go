@@ -75,7 +75,58 @@ func (s *SigaaService) LoginSigaa() error{
 
 // Para implementar: Dados de turmas atuais só aparecem após as matriculas serem processadas 
 func (s *SigaaService) GetTurmas() ([]models.Turma, error) {
-	return s.GetTurmasAnteriores()	
+	var turmas []models.Turma
+	var anoSemestre string 
+
+	c := s.Collector.Clone()
+	c.OnHTML("input[name='javax.faces.ViewState']", func(e *colly.HTMLElement) {
+		s.ViewState = e.Attr("value")
+	})
+	
+	c.OnHTML("p.periodo-atual strong", func(e *colly.HTMLElement) {
+		anoSemestre = strings.TrimSpace(e.Text)
+	})
+
+	c.OnHTML("div#turmas-portal table tbody tr", func(e *colly.HTMLElement) {
+		disciplina := strings.TrimSpace(e.ChildText("td.descricao a"))
+		local := strings.TrimSpace(e.ChildText("td.info[style*='text-align:left'] "))
+		horario := strings.TrimSpace(e.ChildText("td.info[style*='text-align:center']"))
+
+		form := e.DOM.Find("form")
+		nomeForm := form.AttrOr("id", "")
+		idTurma := form.Find("input[name='idTurma']").AttrOr("value", "")
+		paramBotao := form.Find("a[id$=':turmaVirtual']").AttrOr("id", "")
+
+		if nomeForm == "" || idTurma == "" || paramBotao == "" {
+    		return 
+		}
+
+		payload := map[string]string{
+			nomeForm: nomeForm,
+			"javax.faces.ViewState": s.ViewState,
+			"idTurma": idTurma,
+			paramBotao: paramBotao,
+		}
+		
+		novaTurma := models.Turma{
+			Disciplina: disciplina,
+			Local: local,
+			Horario: horario,
+			AnoSemestre: anoSemestre,
+			Payload: payload,
+		}
+		turmas = append(turmas, novaTurma)
+	})
+	
+	err := c.Visit(urlHome)	
+	if err != nil {
+		return nil, fmt.Errorf("Erro ao visitar a home: %v", err)
+	}
+	if len(turmas) == 0 {
+		return nil, fmt.Errorf("Nenhuma turma encontrada")
+	}
+
+	return turmas, nil
 }
 
 // Após o fim de um semestre, só essa informação vai ser disponível
@@ -157,26 +208,18 @@ func (s *SigaaService) GetTurmasAnteriores() ([]models.Turma, error) {
 func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, error) {
 	var tarefas []models.Tarefa
 
-	c := s.Collector
-
-	// Limpa Seletores
-	c.OnHTMLDetach("div#barraEsquerda a")
-	c.OnHTMLDetach("td.first[style*='bold']")
-	c.OnHTMLDetach("table.listagem tr")
-	c.OnHTMLDetach("#turmas-portal span.mais a")
-	
-	c.SetRequestTimeout(30 * time.Second)
+	c := s.Collector.Clone()
 
 	//Atualiza o ViewState
 	c.OnHTML("input[name='javax.faces.ViewState']", func(e *colly.HTMLElement) {
 		s.ViewState = e.Attr("value")
 	})
 	
-	// Entra na aba de turmas anteriores
+	/* Entra na aba de turmas anteriores
 	c.OnHTML("#turmas-portal span.mais a", func(e *colly.HTMLElement) {
 		link := e.Request.AbsoluteURL(e.Attr("href"))
 		e.Request.Visit(link)
-	})
+	})*/
 
 	c.OnHTML("div#barraEsquerda a", func(e *colly.HTMLElement) {
 		textoBotao := strings.TrimSpace(e.ChildText(".itemMenu"))
