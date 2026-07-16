@@ -66,13 +66,56 @@ sigaa-calendar --tarefas --aulas
 > Fique tranquilo, seus dados não serão guardados em nenhuma etapa dessa aplicação (seja web ou CLI), o usuário e senha do SIGAA são utilizados somente para o acesso ao sistema, e são descartados imediatamente. Durante o login esses dados ficam apenas na memória RAM e não são armazenados de nenhuma forma.
 
 ## Instalação
-Este projeto encontra-se atualmente em desenvolvimento. As instruções de instalação serão disponibilizadas em breve.
+O Sigaa Calendar utiliza a API do Google para sincronizar seus dados. Como o binário roda localmente na sua máquina (Modo CLI), você precisa fornecer suas próprias credenciais do Google Cloud e do SIGAA para que o programa funcione.
+### 1. Credenciais do Google Cloud (Acesso à Agenda e Tasks)
+Para que a ferramenta consiga criar eventos e tarefas na sua conta, você precisa de um arquivo de autorização oficial. 
+
+Siga o **[Tutorial Oficial do Google: Criar credenciais de acesso](https://developers.google.com/workspace/guides/create-credentials?hl=pt-br)** para gerar sua chave.
+
+> **Pontos de atenção durante o tutorial do Google:**
+> * Ative a **Google Calendar API** e a **Google Tasks API** no seu projeto.
+> * Na tela de permissão OAuth, adicione o seu próprio e-mail na lista de "Usuários de teste".
+> * Na hora de criar o ID do cliente OAuth, escolha o tipo **App para computador** (Desktop app).
+
+Ao finalizar o processo no Google Cloud, faça o download do arquivo JSON gerado e renomeie-o para `credentials.json`.
+
+### 2. Estrutura de Pastas e Compilação
+O projeto utiliza a diretiva `//go:embed` do Go para embutir as credenciais diretamente no binário final. Por isso, o arquivo `credentials.json` que você acabou de baixar **deve ser colocado obrigatoriamente na mesma pasta do arquivo que utiliza essa diretiva**
+
+A estrutura deve ficar exatamente assim:
+```text
+sigaa-calendar/
+├── cmd/
+│   └── cli/
+│       └── main.go
+└── internal/
+    └── agenda/                 
+        └── credentials.json    <--- COLOQUE AQUI O SEU ARQUIVO DE CREDENCIAIS
+```
+Agora você pode compilar o projeto normalmente: 
+``` Bash
+go build -o sigaa-calendar ./cmd/cli/
+```
+
+### 3. Variáveis de ambiente
+Para manter sua segurança e não deixar senhas salvas em texto puro dentro do código, o programa lê seus dados do SIGAA diretamente das variáveis de ambiente do seu sistema operacional.
+
+Configure as variáveis no seu terminal (você pode exportar temporariamente ou adicionar ao seu ~/.bashrc ou ~/.zshrc):
+```Bash
+export SIGAA_USER="seu_usuario"
+export SIGAA_SENHA="sua_senha_do_sigaa"
+```
+### 4. Executando o programa
+Agora que tudo está configurado você pode executar o programa:
+```Bash
+./sigaa-calendar --tarefas --aulas
+```
+Na primeira vez que você rodar o comando, a primeira ação do programa será abrir o seu navegador padrão automaticamente, solicitando que você faça login na sua conta do Google e autorize o aplicativo. Após aceitar, um arquivo de token (ex: Tasks+CalendarToken.json) será gerado na pasta de configurações do seu sistema (no Linux, o padrão é ~/.config/sigaa-calendar/).
+Com o token salvo, as próximas execuções acontecerão via terminal, sem autorização extra no navegador.
 
 ## Como contribuir
-- O desenvolvimento desse projeto faz parte dos meus estudos pessoais, portanto, atualmente este repositório não aceita contribuições de códigos de terceiros.
 - Caso queira contribuir, você pode abrir uma [issue](https://github.com/Agso-o/sigaa-calendar/issues) com algo que você gostaria que seja corrigido ou adicionado ao projeto.
 - Este projeto foca em organização de prazos e horários, qualquer idéia adicionada as issues deve ser limitada a esse escoṕo
-- Outros tipos de contribuições podem ser consultadas pelo e-mail: sigaacalendar@gmail.com
 
 ## Avisos legais
 - Este software é uma **iniciativa independente** e não possui vínculo oficial com o desenvolvimento do SIGAA.
