@@ -1,11 +1,6 @@
-# Arquivos de configuração e credenciais
+# Arquivos de configuração
 .env
-credentials.json
-token.json
 
 # Arquivo binário
 sigaa-calendar
 sigaa-calendar.exe
-
-# Outros arquivos
-todo.md
