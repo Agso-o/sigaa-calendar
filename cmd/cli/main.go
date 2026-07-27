@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"github.com/Agso-o/sigaa-calendar/internal/agenda"
 	"github.com/Agso-o/sigaa-calendar/internal/wrapper"
 	"github.com/joho/godotenv"
 )
@@ -35,7 +36,14 @@ func main() {
 	if sigaaSenha == "" || sigaaUser == "" {
 		log.Fatal("Não foi possível recuperar credenciais sigaa")
 	}
-	err := wrapper.SigaaSync(*flagAulas, *flagTarefas, sigaaUser, sigaaSenha, nil)
+	clientID := os.Getenv("GOOGLE_CLIENTID")
+	clientSecret := os.Getenv("GOOGLE_CLIENTSECRET")
+	if clientID == "" || clientSecret == "" {
+		log.Fatal("Incapaz de carregar as credenciais do Google")
+	}
+	client, err := agenda.GetClientFromCredentials(clientID, clientSecret)
+	
+	err = wrapper.SigaaSync(*flagAulas, *flagTarefas, sigaaUser, sigaaSenha, client)
 	if err != nil {
 		log.Fatal("Não foi possível sincronizar calendários: ", err)
 	}
