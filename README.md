@@ -28,7 +28,7 @@ Sem instalação e de uso rápido, ideal para usuários mobile
 6. Clique em ``Sincronizar agora`` e pronto, seus dados seráo sincronizados no plano de fundo.
 
 ### Modo CLI
-Essa interface tende a ser um pouco menos acessível, porém bem mais poderosa, permitindo automações localmente. Ela exige um pouco mais de configuração, então antes de prosseguir siga as instruções disponíveis em: [instalação](#instalação)
+Essa interface tende a ser um pouco menos acessível, porém bem mais poderosa, permitindo automações localmente. Ela exige um pouco mais de configuração, então antes de prosseguir siga as instruções disponíveis em: **[instalação](#instalação)**
 
 Após instalar a ferramenta, você poderá ver o guia a seguir digitando o seguinte comando:
 ```bash
@@ -66,14 +66,14 @@ sigaa-calendar --tarefas --aulas
 ## Instalação
 O Sigaa Calendar utiliza a API do Google para sincronizar seus dados. Como o binário roda localmente na sua máquina (Modo CLI), você precisa fornecer suas próprias credenciais do Google Cloud e do SIGAA para que o programa funcione.
 ### 1. Credenciais do Google Cloud (Acesso à Agenda e Tasks)
-Para que a ferramenta consiga criar eventos e tarefas na sua conta Google, você precisa **[[criar um projeto no Google Cloud]]** e gerar as credenciais de ID do cliente OAuth: Client ID e Client Secret
+Para que a ferramenta consiga criar eventos e tarefas na sua conta Google, você precisa **[criar um projeto no Google Cloud](https://console.cloud.google.com/projectcreate )** e gerar as credenciais de ID do cliente OAuth: Client ID e Client Secret
 
-Siga o **[Tutorial Oficial do Google: Criar credenciais de acesso]([https://developers.google.com/workspace/guides/create-credentials?hl=pt-br](https://developers.google.com/workspace/guides/create-credentials?hl=pt-br#oauth-client-id))** para gerar sua chave.
+Siga o **[Tutorial Oficial do Google: Criar credenciais de acesso](https://developers.google.com/workspace/guides/create-credentials?hl=pt-br#oauth-client-id)** para gerar sua chave.
 
-> **Pontos de atenção ao gerar as credenciais:**
-> * Ative a **Google Calendar API** e a **Google Tasks API** no seu projeto.
-> * Na tela de permissão OAuth, adicione o seu próprio e-mail na lista de "Usuários de teste".
-> * Na hora de criar o ID do cliente OAuth, escolha o tipo **App para computador** (Desktop app).
+#### Pontos de atenção ao gerar as credenciais:
+* Ative a **[Google Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com)** e a **[Google Tasks API](https://console.cloud.google.com/apis/library/tasks.googleapis.com)** no seu projeto.
+* Na aba de publico alvo, selecione externo e adicione o seu próprio e-mail na lista de "Usuários de teste".
+* Na hora de criar o cliente OAuth, escolha o tipo **App para computador** (Desktop app).
 
 Após criar o seu cliente OAuth, copie e guarde para a próxima etapa as credenciais: ID do cliente e Chave secreta do cliente
 
@@ -81,7 +81,7 @@ Após criar o seu cliente OAuth, copie e guarde para a próxima etapa as credenc
 Para manter sua segurança e não deixar senhas e credenciais salvas em texto puro dentro do código, o programa lê seus dados do SIGAA e do Google Cloud diretamente das variáveis de ambiente do seu sistema operacional.
 
 #### No Linux
-Configure as variáveis no seu terminal (você pode exportar temporariamente ou adicionar essas linhas ao seu ~/.bashrc ou ~/.zshrc para ficar permanente):
+Configure as variáveis no seu terminal (você pode exportar temporariamente ou adicionar essas linhas ao seu `~/.bashrc` ou `~/.zshrc` para ficar permanente):
 ```Bash
 export SIGAA_USER="seu_usuario"
 export SIGAA_SENHA="sua_senha_do_sigaa"
@@ -120,7 +120,7 @@ Para instalar o programa no sistema Linux e poder utilizá-lo fora da raiz do pr
 ```Bash
 mv sigaa-calendar ~/.local/bin
 ```
-(Certifique-se de que esse diretório está no path com "echo $PATH")
+(Certifique-se de que esse diretório está no path com: `echo $PATH`)
 
 Mais informações de uso em [Como utilizar o modo CLI](#modo-cli)
 
@@ -132,6 +132,6 @@ Com o token salvo, as próximas execuções acontecerão via terminal, sem autor
 - Este projeto foca em organização de prazos e horários, qualquer idéia adicionada as issues deve ser limitada a esse escoṕo
 
 ## Avisos legais
-- Este software é uma **iniciativa independente** e não possui vínculo oficial com o desenvolvimento do SIGAA.
+- Este software é uma **iniciativa independente** e não possui vínculo oficial com o desenvolvimento do SIGAA ou com a UFPI.
 - O usuário é responsável por verificar a precisão dos dados informados por esse sistema, visto que, qualquer alteração ou instabilidade no portal, poderá alterar os resultados e/ou afetar o funcionamento da ferramenta.
 - Este projeto foi inteiramente desenvolvido com foco no sistema da UFPI, o uso dessa ferramenta em outras IFES que utilizam o SIGAA não foi testado e portanto deve ser evitado
