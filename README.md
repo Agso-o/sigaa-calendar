@@ -4,7 +4,7 @@ Este projeto foi desenvolvido com o objetivo de organizar meus próprios horári
 
 #
 ## Status do Projeto
-Atualmente o projeto está em fase de testes, com foco em correção de bugs, melhorias, e na implementação da funcionalidade de sincronizar os prazos de renovação de livros da biblioteca
+O projeto foi lançado oficialmente, mas mantém o foco em correção de bugs, melhorias, e na implementação da funcionalidade de sincronizar os prazos de renovação de livros da biblioteca
 ## Funcionalidades
 - **Sincronização de Horários de aulas**: Salva todos os seus horários de aulas direto do SIGAA para uma nova agenda no Google Calendar como eventos recorrentes que começam do início do período e seguem até o final automaticamente
 
@@ -80,7 +80,7 @@ Após criar o seu cliente OAuth, copie e guarde para a próxima etapa as credenc
 ### 2. Variáveis de ambiente
 Para manter sua segurança e não deixar senhas e credenciais salvas em texto puro dentro do código, o programa lê seus dados do SIGAA e do Google Cloud diretamente das variáveis de ambiente do seu sistema operacional.
 
-#### No Linux
+#### No Linux ou macOS
 Configure as variáveis no seu terminal (você pode exportar temporariamente ou adicionar essas linhas ao seu `~/.bashrc` ou `~/.zshrc` para ficar permanente):
 ```Bash
 export SIGAA_USER="seu_usuario"
@@ -103,20 +103,56 @@ setx SIGAA_SENHA "sua_senha_do_sigaa"
 setx GOOGLE_CLIENTID "seu_ID_do_cliente"
 setx GOOGLE_CLIENTSECRET "sua_chave_secreta_do_cliente"
 ```
+### 3. Baixando o executável (Sem instalar o Go)
+Se você não é desenvolvedor ou não quer instalar e configurar o ambiente Go na sua máquina, a forma mais rápida de utilizar a ferramenta é baixando a versão pronta:
+
+1. Acesse a página de **[Releases](https://github.com/Agso-o/sigaa-calendar/releases)** do repositório.
+2. Baixe o arquivo compactado correspondente ao seu sistema operacional (Windows, Linux ou macOS).
+3. Extraia o arquivo baixado. Você terá o executável `sigaa-calendar` (ou `sigaa-calendar.exe` no Windows) pronto para uso.
+
+#### Executando
+Se você optou por baixar o arquivo pronto, abra o terminal na pasta onde você extraiu o arquivo e execute o programa diretamente (você pode ignorar as instruções de compilação do passo a seguir).
+
+No Linux ou macOS:
+```bash
+chmod +x sigaa-calendar
+./sigaa-calendar --tarefas --aulas
+```
+No Windows:
+```
+.\sigaa-calendar.exe --tarefas --aulas
+```
+
 ### 4. Compilando e executando o programa
 O projeto foi desenvolvido na linguagem Go. Portanto, é necessário ter o Go instalado e configurado corretamente no sistema para compilar e executar o programa.
+
 Agora que está tudo configurado você pode baixar e compilar o projeto normalmente:
-``` Bash
+
+Para Linux ou macOS:
+```Bash
 git clone https://github.com/Agso-o/sigaa-calendar
 cd sigaa-calendar
 go build -o sigaa-calendar ./cmd/cli/
 ```
-E para executar:
-```Bash
+Para Windows:
+```DOS
+git clone https://github.com/Agso-o/sigaa-calendar
+cd sigaa-calendar
+go build -o sigaa-calendar.exe .\cmd\cli\
+```
+#### Executando 
+
+No Linux ou macOS:
+```bash
 chmod +x sigaa-calendar
 ./sigaa-calendar --tarefas --aulas
 ```
-Para instalar o programa no sistema Linux e poder utilizá-lo fora da raiz do projeto, mova o arquivo para um diretório no $PATH:
+No Windows:
+```DOS
+.\sigaa-calendar.exe --tarefas --aulas
+```
+
+Para instalar o programa no sistema Linux ou macOS e poder utilizá-lo fora da raiz do projeto, mova o arquivo para um diretório no $PATH:
 ```Bash
 mv sigaa-calendar ~/.local/bin
 ```
