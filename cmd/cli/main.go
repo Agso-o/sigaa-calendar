@@ -13,23 +13,25 @@ import (
 func main() {
 	// Flags de Terminal: Interface CLI
 	flag.Usage = func() {
-		fmt.Printf("----------Sigaa Calendar----------\n\n")
-		fmt.Printf("Uso:\n")
-		fmt.Printf(" sigaa-calendar [flags]\n\n")
-		fmt.Println("Flags disponíveis:")
-		flag.PrintDefaults()
-		fmt.Println("Padrão: Sincroniza somente tarefas caso nenhuma flag seja fornecida")
+helpMessage := `----------Sigaa Calendar----------
+Uso:
+ sigaa-calendar [flags]
+
+Flags disponíveis:`
+	fmt.Println(helpMessage)
+	flag.PrintDefaults()
 	}
 	flagAulas := flag.Bool("aulas", false, "Sincroniza os horários das aulas com o Google Agenda")
 	flagTarefas := flag.Bool("tarefas", false, "Sincroniza prazos de entrega de trabalhos com o Google Tasks")
+	flagBiblioteca := flag.Bool("lib", false, "Sincroniza prazos de entrega de livros com o Google Tasks")
 	
 	flag.Parse()
-
-	if !*flagTarefas && !*flagAulas {
-		*flagTarefas = true
-	}
 	
-	// Recebe Credenciais das variaveis de ambiente
+	if flag.NFlag() == 0 {
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	_ = godotenv.Load()
 	sigaaUser := os.Getenv("SIGAA_USER")
 	sigaaSenha := os.Getenv("SIGAA_SENHA")
@@ -43,7 +45,7 @@ func main() {
 	}
 	client, err := agenda.GetClientFromCredentials(clientID, clientSecret)
 	
-	err = wrapper.SigaaSync(*flagAulas, *flagTarefas, sigaaUser, sigaaSenha, client)
+	err = wrapper.SigaaSync(*flagAulas, *flagTarefas, *flagBiblioteca ,sigaaUser, sigaaSenha, client)
 	if err != nil {
 		log.Fatal("Não foi possível sincronizar calendários: ", err)
 	}

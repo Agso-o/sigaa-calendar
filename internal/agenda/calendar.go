@@ -72,3 +72,30 @@ func (s *CalendarService) SaveEventTarefa(tarefa models.Tarefa) error {
 
 	return nil
 }
+
+func (s *CalendarService) SaveEventEmprestimo(emp models.Emprestimo) error {
+	hash := md5.Sum([]byte(emp.Livro + emp.Prazo.Format(time.RFC3339)))
+	id := hex.EncodeToString(hash[:])
+	event := &calendar.Event{
+		Id:          id,
+		Summary:     "Devolver: " + emp.Livro,
+		Location:    "Biblioteca UFPI",
+		Description: "Prazo de devolução\nBy sigaa-Calendar",
+		Start: &calendar.EventDateTime{
+			DateTime: emp.Prazo.Add(-time.Hour).Format(time.RFC3339),
+			TimeZone: models.TimeZone,
+		},
+		End: &calendar.EventDateTime{
+			DateTime: emp.Prazo.Format(time.RFC3339),
+			TimeZone: models.TimeZone,
+		},
+	}
+	_, err := s.srv.Events.Insert(s.CalendarID, event).Do()
+	if err != nil {
+		if googleError, ok := err.(*googleapi.Error); ok && googleError.Code == 409 {
+			return nil
+		}
+		return fmt.Errorf("Erro ao salvar evento de empréstimo: %v", err)
+	}
+	return nil
+}
