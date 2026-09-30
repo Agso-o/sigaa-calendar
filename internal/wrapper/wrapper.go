@@ -9,7 +9,7 @@ import (
 	"github.com/Agso-o/sigaa-calendar/internal/sigaa"
 )
 
-func SigaaSync (flagAulas, flagTarefas bool, sigaaUser, sigaaPass string, googleClient *http.Client) error {
+func SigaaSync (flagAulas, flagTarefas, flagBiblioteca bool, sigaaUser, sigaaPass string, googleClient *http.Client) error {
 	// Loga no sigaa e recupera as turmas
 	sigaaSrv, err:= sigaa.NewSigaaService(sigaaUser, sigaaPass)
 	if err != nil{
@@ -17,9 +17,9 @@ func SigaaSync (flagAulas, flagTarefas bool, sigaaUser, sigaaPass string, google
 	}
 	err = sigaaSrv.LoginSigaa()
 	if err != nil {
-		return fmt.Errorf("Erro ao logar no sigaa")
+		return fmt.Errorf("Erro ao logar no sigaa: %v", err)
 	}
-
+	
 	turmas, err := sigaaSrv.GetTurmas()
 
 	if err != nil {
@@ -33,8 +33,23 @@ func SigaaSync (flagAulas, flagTarefas bool, sigaaUser, sigaaPass string, google
 		return fmt.Errorf("Não foi possível iniciar o serviço do google: %v", err)
 	}
 	
-	var tarefasExistentes map[string]string
+	if flagBiblioteca {
+		emprestimos, err := sigaaSrv.GetPrazoBiblioteca()
+		if err != nil {
+			log.Printf("Não foi possível recuperar empréstimos: %v\n", err)
 
+		} else if len(emprestimos) == 0 {
+			log.Println("Nenhum empréstimo ativo no momento")
+		} else {
+			for _, emp := range emprestimos {
+				if err := agendaSrv.CalendarService.SaveEventEmprestimo(emp); err != nil {
+					log.Println("Não foi possível salvar empréstimo:", err)
+				}
+			}
+		}
+	}	
+	var tarefasExistentes map[string]string
+	
 	if flagTarefas {
 		// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
 		tarefasExistentes, err = agendaSrv.TasksService.GetTasks()

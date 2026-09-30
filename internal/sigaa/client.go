@@ -2,6 +2,7 @@ package sigaa
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -17,9 +18,13 @@ const (
 )
 
 var (
+	reCodigoMaterial = regexp.MustCompile(`^(\d+)\s*-\s*`)
+	reBiblioteca = regexp.MustCompile(`\s*-\s*(Biblioteca[^-]*)$`)
+	reMenuBiblioteca = regexp.MustCompile(`(menu_form_menu_discente_[a-zA-Z0-9_]+_menu):A\]#\{meusEmprestimosBibliotecaMBean\.iniciarVisualizarEmprestimosRenovaveis\}`)
 	reForm     = regexp.MustCompile(`document\.getElementById\('([^']+)'\)`)
 	reTurma    = regexp.MustCompile(`'idTurma':'(\d+)'`)
 	reBotao    = regexp.MustCompile(`{'([^']+)':'[^']+'`)
+	reTarefaID = regexp.MustCompile(`'id':'(\d+)'`)
 )
 
 type SigaaService struct {
@@ -167,6 +172,13 @@ func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, e
 		if tarefaEnviada.Length() > 0 {
 			return
 		}
+		// Extrai o ID interno do SIGAA a partir do onclick do ícone da linha
+		onclickEnviar := e.DOM.Parent().Find("a[title='Enviar tarefa']").AttrOr("onclick", "")
+		onclickVisualizar := e.DOM.Parent().Find("a[title*='Visualizar']").AttrOr("onclick", "")
+		sigaaID := ""
+		if match := reTarefaID.FindStringSubmatch(onclickEnviar + onclickVisualizar); len(match) > 1 {
+			sigaaID = match[1]
+		}
 
 		descricao := e.DOM.Parent().Next().Find("td.first p").Text()
 		descricao = strings.TrimSpace(descricao)
@@ -182,6 +194,7 @@ func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, e
 			Titulo: titulo,
 			Descricao: descricao,
 			DataVencimento: endTime,	
+			SigaaID: sigaaID,
 		}
 
 		tarefas = append(tarefas, *novaTarefa)
@@ -199,4 +212,109 @@ func (s *SigaaService) GetTarefasByTurma(turma models.Turma) ([]models.Tarefa, e
 		return nil, fmt.Errorf("Erro ao visitar turma: %v", err)
 	}
 	return tarefas, nil 	
+}
+
+func (s *SigaaService) GetPrazoBiblioteca() ([]models.Emprestimo, error) {
+	var emprestimos []models.Emprestimo
+	var menuAction string
+	var semEmprestimos bool
+
+	c := s.Collector.Clone()
+
+	c.OnHTML("input[name='javax.faces.ViewState']", func(e *colly.HTMLElement) {
+		s.ViewState = e.Attr("value")
+	})
+
+	c.OnHTML("script", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Text, "meusEmprestimosBibliotecaMBean.iniciarVisualizarEmprestimosRenovaveis") {
+			match := reMenuBiblioteca.FindStringSubmatch(e.Text)
+			if len(match) > 0 {
+				menuAction = match[0]
+			}
+		}
+	})
+
+	err := c.Visit(urlHome)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao visitar a home: %v", err)
+	}
+
+	if menuAction == "" {
+		return nil, fmt.Errorf("não foi possível encontrar a ação do menu da biblioteca")
+	}
+
+	cLib := s.Collector.Clone()
+
+	cLib.OnHTML("input[name='javax.faces.ViewState']", func(e *colly.HTMLElement) {
+		s.ViewState = e.Attr("value")
+	})
+
+	cLib.OnHTML("div", func(e *colly.HTMLElement) {
+		if strings.Contains(e.Text, "não possui empréstimos ativos") {
+			semEmprestimos = true
+		}
+	})
+
+	cLib.OnHTML("table.listagem tbody tr", func(e *colly.HTMLElement) {
+		colunas := e.DOM.Find("td")
+
+		if colunas.Length() >= 4 {
+			livroRaw := strings.TrimSpace(colunas.Eq(1).Text())
+			dataRaw := strings.TrimSpace(colunas.Eq(3).Text())
+
+			if livroRaw == "" || dataRaw == "" {
+				return
+			}
+			
+			_, descricao, biblioteca := parseLivro(livroRaw)
+
+			zone, _ := time.LoadLocation(models.TimeZone)
+			prazo, err := time.ParseInLocation("02/01/2006 15:04:05", dataRaw, zone)
+			if err != nil {
+				log.Printf("Não foi possível parsear prazo do empréstimo '%s': %v\n", livroRaw, err)
+				return
+			}
+
+			emprestimos = append(emprestimos, models.Emprestimo{
+				Livro: descricao,
+				Biblioteca: biblioteca,
+				Prazo: prazo,
+			})
+		}
+	})
+
+	dadosPost := map[string]string{
+		"menu:form_menu_discente": "menu:form_menu_discente",
+		"form_menu_discente":      "form_menu_discente",
+		"jscook_action":           menuAction,
+		"javax.faces.ViewState":   s.ViewState,
+	}
+
+	err = cLib.Post(urlHome, dadosPost)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao acessar página de empréstimos: %v", err)
+	}
+
+	if semEmprestimos {
+		return []models.Emprestimo{}, nil
+	}
+
+	return emprestimos, nil
+}
+
+func parseLivro(raw string) (codigo, descricao, biblioteca string) {
+	descricao = raw
+
+	if match := reCodigoMaterial.FindStringSubmatch(descricao); len(match) > 1 {
+		codigo = match[1]
+		descricao = descricao[len(match[0]):]
+	}
+
+	if match := reBiblioteca.FindStringSubmatch(descricao); len(match) > 1 {
+		biblioteca = strings.TrimSpace(match[1])
+		descricao = descricao[:len(descricao)-len(match[0])]
+	}
+
+	descricao = strings.TrimSpace(descricao)
+	return
 }

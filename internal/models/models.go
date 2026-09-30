@@ -22,6 +22,7 @@ type Tarefa struct {
 	Titulo string
 	Descricao string
 	DataVencimento time.Time
+	SigaaID string
 
 }
 
@@ -34,3 +35,8 @@ type Aula struct {
 
 }
 
+type Emprestimo struct {
+	Livro string
+	Biblioteca string
+	Prazo time.Time
+}
