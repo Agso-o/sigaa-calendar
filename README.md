@@ -10,7 +10,7 @@ Atualmente o projeto está em fase de testes, com foco em correção de bugs, me
 
 - **Sincronização de Prazos de entrega**: Salva todos os prazos de entrega dos trabalhos e atividades que ainda não foram entregues no sigaa direto para o Google Tasks. Esses prazos são salvos como tarefas contendo o título, descrição, e data de entrega, e podem ser marcados como concluidos pelo usuário direto pela plataforma do Google Tasks.
 
-- **Sincronização de datas de renovação da Biblioteca**: ---Em desenvolvimento---
+- **Sincronização de datas de renovação da Biblioteca**: Salva a data de renovação dos emprestimo de livros da biblioteca como eventos no Google Calendar na agenda criada pelo programa
 
 ## Guia de uso
 O SIGAA-Calendar oferece duas formas de interagir com a ferramenta: uma interface gráfica via web, para maior acessibilidade e uma interface de linha de comando através do programa compilado.
@@ -37,18 +37,18 @@ sigaa-calendar --help
 O programa deverá responder com a seguinte mensagem:
 ``` bash
 ----------Sigaa Calendar----------
-
 Uso:
  sigaa-calendar [flags]
 
 Flags disponíveis:
   -aulas
-        Sincroniza os horários das aulas com o Google Agenda
+    	Sincroniza os horários das aulas com o Google Agenda
+  -lib
+    	Sincroniza prazos de entrega de livros com o Google Tasks
   -tarefas
-        Sincroniza prazos de entrega de trabalhos com o Google Tasks
-Padrão: Sincroniza somente tarefas caso nenhuma flag seja fornecida
+    	Sincroniza prazos de entrega de trabalhos com o Google Tasks
 ```
-Exemplos:
+Exemplos de uso:
 ```bash
 # Sincronizará apenas tarefas
 sigaa-calendar --tarefas
@@ -56,8 +56,11 @@ sigaa-calendar --tarefas
 # Sincronizará apenas aulas
 sigaa-calendar --aulas
 
+# sincronizará apenas as datas da biblioteca
+sigaa-calendar --lib
+
 # Para sincronizar ambos os dados
-sigaa-calendar --tarefas --aulas
+sigaa-calendar --tarefas --aulas --lib
 
 ```
 
