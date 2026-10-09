@@ -46,10 +46,14 @@ func SigaaSync (flagAulas, flagTarefas, flagBiblioteca bool, sigaaUser, sigaaPas
 					log.Println("Não foi possível salvar empréstimo:", err)
 				}
 			}
+			log.Println("----------Empréstimos salvos com sucesso----------")
 		}
 	}	
 	var tarefasExistentes map[string]string
 	
+	if !flagTarefas && !flagAulas {
+		return nil
+	}
 	if flagTarefas {
 		// Pega as tarefas da conta do tasks e guarda em um mapa pra não salvar repetida
 		tarefasExistentes, err = agendaSrv.TasksService.GetTasks()
